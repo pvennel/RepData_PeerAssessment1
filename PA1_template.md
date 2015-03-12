@@ -47,7 +47,7 @@ hist(activityDailySummary$dailySteps, col="lightblue", breaks=53,
            xlab="Steps per day")
 ```
 
-![](instructions_fig/plot1.png) 
+![](instructions_fig/plot1.png)
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
@@ -109,7 +109,7 @@ Max5MinInterval <- activity5MinSummary[which.max(activity5MinSummary$Avg5Mins), 
 Max5MinIntervalSlot <- strftime(Max5MinInterval$newInterval, format= "%H:%M")
 ```
 
-The max number of steps is **206.1698113** and it occurred during **08:35**
+The max number of steps is **206** and it occurred during **08:35**
 
 
 ## Inputing missing values
@@ -119,12 +119,10 @@ The max number of steps is **206.1698113** and it occurred during **08:35**
 
 ```r
 ## Number of rows with missing values
-sum(is.na(activityDT$steps))
+countMissingVals <- sum(is.na(activityDT$steps))
 ```
 
-```
-## [1] 2304
-```
+The number of rows with missing values is **2304**
 
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
@@ -166,6 +164,8 @@ suppressWarnings(activityDTNew$steps[is.na(activityDTNew$steps)] <-
 ```
 
 
+
+
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
@@ -178,25 +178,23 @@ hist(activityDailySummaryNew$dailySteps, col="lightblue", breaks=61,
      xlab="Steps per day")
 ```
 
-![](instructions_fig/plot3.png) 
+![](instructions_fig/plot3.png)
 
 ```r
 ## Calculating the Daily Median steps
-median(activityDailySummaryNew$dailySteps)
-```
+newMedian <- median(activityDailySummaryNew$dailySteps)
 
-```
-## [1] 10944
-```
-
-```r
 ## Calculating the Daily Mean steps
-mean(activityDailySummaryNew$dailySteps)
+newMean <- mean(activityDailySummaryNew$dailySteps)
 ```
 
-```
-## [1] 10737.57
-```
+Variable Name  |  Before Values |  New Values
+-------------| :-------------: | :----------:
+Median Value | 10765 | 10944  
+Mean Value  | 10766   | 10737  
+
+There is an increase of <b>179 steps</b> in the new Median value.<br>
+There is however a slight decrease of <b>29 steps</b> in the new Mean value. 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -232,3 +230,4 @@ ggplot(data=activityDTNewSummary, aes(x=interval, y=Avg5Mins)) +
 
 ![](instructions_fig/plot4.png) 
 
+> Based on the above plot, we see that there are more activities on Weekedays than weekends between the hours of 5:00 and 10:00. Also the peak of activity on Weekday is greater at this time period compared to weekend.There is no or very little activity between 1:00 and 5:00 in both cases. Similarly the activity tapers off after 21:00 in both cases.
