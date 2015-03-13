@@ -14,10 +14,15 @@ output:
 ```{r echo = TRUE}
 library(plyr)
 library(ggplot2)
+library("scales")
+library("knitr")
 
 ## initialize file name variables so that yu just refer to it everytime you need it.
 zipFile <- "activity.zip"
 dataFile <- "activity.csv"
+
+# opts_knit$set(base.dir = 'figures')
+
 
 ## unzip the file to get csv file.
 unzip(zipFile, dataFile)
@@ -42,7 +47,7 @@ activityDailySummary <- ddply(activityDTNonNA, .(date), summarize, dailySteps=su
 ```
 
 2. Make a histogram of the total number of steps taken each day
-```{r, echo=TRUE}
+```{r "plot1" , echo=TRUE, fig.path="figures/" }
 hist(activityDailySummary$dailySteps, col="lightblue", breaks=53, 
            main="Activity for October and November 2012" ,
            xlab="Steps per day")
@@ -51,17 +56,21 @@ hist(activityDailySummary$dailySteps, col="lightblue", breaks=53,
 3. Calculate and report the mean and median of the total number of steps taken per day
 ```{r, echo=TRUE}
 ## median of the total number of steps per day
-median(activityDailySummary$dailySteps)
+dailyMedian <- median(activityDailySummary$dailySteps)
 
 ## mean of the total number of steps per day
-mean(activityDailySummary$dailySteps)
+dailyMean <- mean(activityDailySummary$dailySteps)
 ```
+
+The daily Mean for total number of steps is `r dailyMean`
+
+The daily Median for total number of steps is `r dailyMedian`
 
 
 ## What is the average daily activity pattern?
 
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r, echo=TRUE}
+```{r}
 ## group by intervals and calculate the Average
 activity5MinSummary <- ddply(activityDTNonNA, .(interval), summarize, 
                              Avg5Mins=sum(steps)/length(steps) )
@@ -74,7 +83,7 @@ activity5MinSummary$newInterval <- strptime(sprintf("%04d",
 ```
 
 
-```{r, echo=TRUE}
+```{r "plot2" , echo=TRUE, fig.path="figures/"}
 plot(x=activity5MinSummary$newInterval, 
      y=activity5MinSummary$Avg5Mins,
      type="l",
@@ -152,11 +161,20 @@ suppressWarnings(activityDTNew$steps[is.na(activityDTNew$steps)] <-
 ```{r, echo=TRUE}
 ## use ddply to summarize by day
 activityDailySummaryNew <- ddply(activityDTNew, .(date), summarize, dailySteps=sum(steps))
+```
+
+Code to generate the plot
+
+```{r "plot3" , echo=TRUE, fig.path="figures/"}
 
 hist(activityDailySummaryNew$dailySteps, col="lightblue", breaks=61, 
      main="Activity for October and November 2012" ,
      xlab="Steps per day")
+```
 
+We are now calculating the Median and Mean.
+
+```{r, echo=TRUE}
 ## Calculating the Daily Median steps
 newMedian <- median(activityDailySummaryNew$dailySteps)
 
@@ -190,17 +208,25 @@ activityDTNew$weekday[activityDTNew$dayOfWeek == 0 | activityDTNew$dayOfWeek== 6
 activityDTNewSummary <- ddply(activityDTNew, c("interval","weekday"), summarize, 
                           Avg5Mins=sum(steps)/length(steps))
 
+## This is to handle the gaps as we move from 55 minutes to the hour every hour. 
+## other wise it will be treated as integer with gap of 45 instead of 5.
+activityDTNewSummary$NewInterval <- strptime(sprintf("%04d", 
+                                                     as.numeric(activityDTNewSummary$interval)), 
+                                             format="%H%M")
 ```
 
 Code to generate the plot
 
-```{r, echo=TRUE}
-ggplot(data=activityDTNewSummary, aes(x=interval, y=Avg5Mins)) +
+```{r "plot4" , echo=TRUE, fig.path="figures/"}
+ggplot(data=activityDTNewSummary, aes(x=NewInterval, y=Avg5Mins)) +
   geom_line() + 
   facet_wrap(~weekday, nrow=2)+
   ylab("Average number of steps") +
   xlab("5 minute Time interval") +
-  ggtitle("Comparison of Activity between Weekdays and Weekends")
+  ggtitle("Comparison of Activity between Weekdays and Weekends") +
+  scale_x_datetime(labels = date_format("%H:%M"))
 ```
+
+# scale_x_continuous(breaks=number_ticks(10))
 
 > Based on the above plot, we see that there are more activities on Weekedays than weekends between the hours of 5:00 and 10:00. Also the peak of activity on Weekday is greater at this time period compared to weekend.There is no or very little activity between 1:00 and 5:00 in both cases. Similarly the activity tapers off after 21:00 in both cases.

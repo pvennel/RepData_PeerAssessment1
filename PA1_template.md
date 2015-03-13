@@ -10,10 +10,15 @@ Sunday, March 08, 2015
 ```r
 library(plyr)
 library(ggplot2)
+library("scales")
+library("knitr")
 
 ## initialize file name variables so that yu just refer to it everytime you need it.
 zipFile <- "activity.zip"
 dataFile <- "activity.csv"
+
+# opts_knit$set(base.dir = 'figures')
+
 
 ## unzip the file to get csv file.
 unzip(zipFile, dataFile)
@@ -47,27 +52,21 @@ hist(activityDailySummary$dailySteps, col="lightblue", breaks=53,
            xlab="Steps per day")
 ```
 
-![](instructions_fig/plot1.png)
+![](figures/plot1-1.png) 
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
 ```r
 ## median of the total number of steps per day
-median(activityDailySummary$dailySteps)
-```
+dailyMedian <- median(activityDailySummary$dailySteps)
 
-```
-## [1] 10765
-```
-
-```r
 ## mean of the total number of steps per day
-mean(activityDailySummary$dailySteps)
+dailyMean <- mean(activityDailySummary$dailySteps)
 ```
 
-```
-## [1] 10766.19
-```
+The daily Mean for total number of steps is 1.0766189\times 10^{4}
+
+The daily Median for total number of steps is 10765
 
 
 ## What is the average daily activity pattern?
@@ -97,7 +96,7 @@ plot(x=activity5MinSummary$newInterval,
      ylab="Average number of steps")
 ```
 
-![](instructions_fig/plot2.png) 
+![](figures/plot2-1.png) 
 
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -172,13 +171,21 @@ suppressWarnings(activityDTNew$steps[is.na(activityDTNew$steps)] <-
 ```r
 ## use ddply to summarize by day
 activityDailySummaryNew <- ddply(activityDTNew, .(date), summarize, dailySteps=sum(steps))
+```
 
+Code to generate the plot
+
+
+```r
 hist(activityDailySummaryNew$dailySteps, col="lightblue", breaks=61, 
      main="Activity for October and November 2012" ,
      xlab="Steps per day")
 ```
 
-![](instructions_fig/plot3.png)
+![](figures/plot3-1.png) 
+
+We are now calculating the Median and Mean.
+
 
 ```r
 ## Calculating the Daily Median steps
@@ -214,20 +221,29 @@ activityDTNew$weekday[activityDTNew$dayOfWeek == 0 | activityDTNew$dayOfWeek== 6
 ## grouping weekday data by intervals
 activityDTNewSummary <- ddply(activityDTNew, c("interval","weekday"), summarize, 
                           Avg5Mins=sum(steps)/length(steps))
+
+## This is to handle the gaps as we move from 55 minutes to the hour every hour. 
+## other wise it will be treated as integer with gap of 45 instead of 5.
+activityDTNewSummary$NewInterval <- strptime(sprintf("%04d", 
+                                                     as.numeric(activityDTNewSummary$interval)), 
+                                             format="%H%M")
 ```
 
 Code to generate the plot
 
 
 ```r
-ggplot(data=activityDTNewSummary, aes(x=interval, y=Avg5Mins)) +
+ggplot(data=activityDTNewSummary, aes(x=NewInterval, y=Avg5Mins)) +
   geom_line() + 
   facet_wrap(~weekday, nrow=2)+
   ylab("Average number of steps") +
   xlab("5 minute Time interval") +
-  ggtitle("Comparison of Activity between Weekdays and Weekends")
+  ggtitle("Comparison of Activity between Weekdays and Weekends") +
+  scale_x_datetime(labels = date_format("%H:%M"))
 ```
 
-![](instructions_fig/plot4.png) 
+![](figures/plot4-1.png) 
+
+# scale_x_continuous(breaks=number_ticks(10))
 
 > Based on the above plot, we see that there are more activities on Weekedays than weekends between the hours of 5:00 and 10:00. Also the peak of activity on Weekday is greater at this time period compared to weekend.There is no or very little activity between 1:00 and 5:00 in both cases. Similarly the activity tapers off after 21:00 in both cases.
