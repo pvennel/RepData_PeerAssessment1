@@ -17,9 +17,6 @@ library("knitr")
 zipFile <- "activity.zip"
 dataFile <- "activity.csv"
 
-# opts_knit$set(base.dir = 'figures')
-
-
 ## unzip the file to get csv file.
 unzip(zipFile, dataFile)
 ```
@@ -48,7 +45,7 @@ activityDailySummary <- ddply(activityDTNonNA, .(date), summarize, dailySteps=su
 
 ```r
 hist(activityDailySummary$dailySteps, col="lightblue", breaks=53, 
-           main="Activity for October and November 2012" ,
+           main="Histogram: Activity for Oct and Nov 2012" ,
            xlab="Steps per day")
 ```
 
@@ -64,9 +61,9 @@ dailyMedian <- median(activityDailySummary$dailySteps)
 dailyMean <- mean(activityDailySummary$dailySteps)
 ```
 
-The daily Mean for total number of steps is 1.0766189\times 10^{4}
+The daily Mean for total number of steps is **10766**
 
-The daily Median for total number of steps is 10765
+The daily Median for total number of steps is **10765**
 
 
 ## What is the average daily activity pattern?
@@ -85,15 +82,18 @@ activity5MinSummary$newInterval <- strptime(sprintf("%04d",
                                             format="%H%M")
 ```
 
+Code to generate the plot
 
 
 ```r
-plot(x=activity5MinSummary$newInterval, 
-     y=activity5MinSummary$Avg5Mins,
-     type="l",
-     main="Time series plot - Personal Activity",
-     xlab="5 minute Time interval",
-     ylab="Average number of steps")
+ggplot(data=activity5MinSummary, aes(x=newInterval, y=Avg5Mins)) +
+  geom_line() + 
+  ylab("Average number of steps") +
+  xlab("5 minute Time interval") +
+  ggtitle("Time series plot - Personal Activity") + 
+  scale_x_datetime(breaks=("2 hour"), 
+                   minor_breaks=("1 hour"),
+                   labels = date_format("%H:%M"))
 ```
 
 ![](figures/plot2-1.png) 
@@ -173,12 +173,12 @@ suppressWarnings(activityDTNew$steps[is.na(activityDTNew$steps)] <-
 activityDailySummaryNew <- ddply(activityDTNew, .(date), summarize, dailySteps=sum(steps))
 ```
 
-Code to generate the plot
+Code to generate the histogram
 
 
 ```r
 hist(activityDailySummaryNew$dailySteps, col="lightblue", breaks=61, 
-     main="Activity for October and November 2012" ,
+     main="Histogram: Activity for Oct and Nov 2012" ,
      xlab="Steps per day")
 ```
 
@@ -238,12 +238,13 @@ ggplot(data=activityDTNewSummary, aes(x=NewInterval, y=Avg5Mins)) +
   facet_wrap(~weekday, nrow=2)+
   ylab("Average number of steps") +
   xlab("5 minute Time interval") +
-  ggtitle("Comparison of Activity between Weekdays and Weekends") +
-  scale_x_datetime(labels = date_format("%H:%M"))
+  ggtitle("Comparison of Activity between Weekdays and Weekends") + 
+  scale_x_datetime(breaks=("2 hour"), 
+                   minor_breaks=("1 hour"),
+                   labels = date_format("%H:%M")) 
 ```
 
 ![](figures/plot4-1.png) 
 
-# scale_x_continuous(breaks=number_ticks(10))
 
 > Based on the above plot, we see that there are more activities on Weekedays than weekends between the hours of 5:00 and 10:00. Also the peak of activity on Weekday is greater at this time period compared to weekend.There is no or very little activity between 1:00 and 5:00 in both cases. Similarly the activity tapers off after 21:00 in both cases.
