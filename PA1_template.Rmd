@@ -67,7 +67,7 @@ The daily Median for total number of steps is **`r as.integer(dailyMedian)`**
 ## What is the average daily activity pattern?
 
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r}
+```{r, echo=TRUE}
 ## group by intervals and calculate the Average
 activity5MinSummary <- ddply(activityDTNonNA, .(interval), summarize, 
                              Avg5Mins=sum(steps)/length(steps) )
